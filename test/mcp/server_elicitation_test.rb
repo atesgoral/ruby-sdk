@@ -17,6 +17,8 @@ module MCP
 
       def send_request(method, params = nil, **_kwargs)
         @requests << { method: method, params: params }
+        return { action: "accept", content: { name: "test_user" } } if params[:mode] == "form"
+
         { action: "accept" }
       end
 
@@ -112,7 +114,7 @@ module MCP
       assert_equal "form", request[:params][:mode]
       assert_equal "Please provide your name", request[:params][:message]
       assert_equal "object", request[:params][:requestedSchema][:type]
-      assert_equal({ action: "accept" }, result)
+      assert_equal({ action: "accept", content: { name: "test_user" } }, result)
     end
 
     test "#create_form_elicitation raises error when client does not support elicitation" do

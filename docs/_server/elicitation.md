@@ -85,6 +85,9 @@ primitive types (`string`, `number`, `integer`, `boolean`). Nested objects and a
 the schema simple enough for clients to render as a form. Per the MCP specification, the client validates
 the user's input against this schema before returning it, so the `content` of an `accept` response matches the requested shape.
 
+`create_form_elicitation`, `create_url_elicitation`, and the legacy `input_required` shim validate reply actions and accepted form content.
+Invalid replies raise `MCP::Server::ValidationError` with a message starting with `Response validation failed:`.
+
 ## Default Values and Enums
 
 Properties may declare a `default` value (SEP-1034), which clients use to pre-fill the form.
