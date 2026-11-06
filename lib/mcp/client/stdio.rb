@@ -34,9 +34,17 @@ module MCP
       # Matches the C# SDK's `DiscoverProbeTimeout` default.
       DEFAULT_DISCOVER_PROBE_TIMEOUT = 5
 
+      # Base process environment plus RubyGems and Bundler configuration.
+      DEFAULT_INHERITED_ENV_VARS = if Gem.win_platform?
+        %w[APPDATA HOMEDRIVE HOMEPATH LOCALAPPDATA PATH PATHEXT PROCESSOR_ARCHITECTURE
+          SYSTEMDRIVE SYSTEMROOT TEMP USERNAME USERPROFILE GEM_HOME GEM_PATH BUNDLE_GEMFILE].freeze
+      else
+        %w[HOME LOGNAME PATH SHELL TERM USER GEM_HOME GEM_PATH BUNDLE_GEMFILE].freeze
+      end
+
       attr_reader :command, :args, :env, :server_info
 
-      def initialize(command:, args: [], env: nil, read_timeout: nil, max_line_bytes: MAX_LINE_BYTES)
+      def initialize(command:, args: [], env: nil, inherit_env: false, read_timeout: nil, max_line_bytes: MAX_LINE_BYTES)
         # Reject `nil` or non-positive values: `IO#gets("\n", nil)` and a negative
         # limit read without an upper bound, which would silently disable the
         # protection this option exists to provide.
@@ -47,6 +55,7 @@ module MCP
         @command = command
         @args = args
         @env = env
+        @inherit_env = inherit_env
         @read_timeout = read_timeout
         @max_line_bytes = max_line_bytes
         @stdin = nil
@@ -166,8 +175,8 @@ module MCP
       def start
         raise "MCP::Client::Stdio already started" if @started
 
-        spawn_env = @env || {}
-        @stdin, @stdout, @stderr, @wait_thread = Open3.popen3(spawn_env, @command, *@args)
+        spawn_env = DEFAULT_INHERITED_ENV_VARS.to_h { |key| [key, ENV[key]] }.compact.merge(@env || {})
+        @stdin, @stdout, @stderr, @wait_thread = Open3.popen3(spawn_env, @command, *@args, unsetenv_others: !@inherit_env)
         @stdout.set_encoding("UTF-8")
         @stdin.set_encoding("UTF-8")
 
