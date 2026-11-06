@@ -39,7 +39,7 @@ It implements the Model Context Protocol specification, handling model context r
 - Multi round-trip `input_required` results (MCP 2026-07-28, SEP-2322): handlers return `MCP::Server::InputRequiredResult` to ask
   the client for additional input instead of performing a server-initiated request; see [Multi Round-Trip Requests](/server/mrtr/)
 - `ping` - Simple health check
-- `logging/setLevel` - Configures the minimum log level for the server (deprecated as of 2026-07-28)
+- `logging/setLevel` - Configures the minimum log level for the calling session (deprecated as of 2026-07-28)
 - `tools/list` - Lists all registered tools and their schemas
 - `tools/call` - Invokes a specific tool with provided arguments
 - `prompts/list` - Lists all registered prompts and their schemas

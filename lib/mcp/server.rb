@@ -1382,8 +1382,11 @@ module MCP
         raise RequestHandlerError.new("Invalid log level #{request[:level]}", request, error_type: :invalid_params)
       end
 
-      session&.configure_logging(logging_message_notification)
-      @logging_message_notification = logging_message_notification
+      if session
+        session.configure_logging(logging_message_notification)
+      else
+        @logging_message_notification = logging_message_notification
+      end
 
       {}
     end
